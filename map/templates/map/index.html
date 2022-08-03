@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Permaculture Design Tool</title>
+    <!--<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>-->
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'map/style.css' %}" />
+    <script type="module" src="{% static 'map/index.js' %}"></script>
+  </head>
+
+  <body>
+    <h2>Welcome to the Permaculture design helper!</h2>
+
+    <div id="address">
+      <input id="autocomplete" placeholder = "Enter a place" type="text"/>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- The `defer` attribute causes the callback to execute after the full HTML document has been parsed. For non-blocking uses, avoiding race conditions,
+    and consistent behavior across browsers, consider loading using Promises with https://www.npmjs.com/package/@googlemaps/js-api-loader. -->
+    <script defer src= "https://maps.googleapis.com/maps/api/js?key={{API_Key}}&libraries=places&callback=initMap&v=weekly"></script>
+  </body>
+</html>
