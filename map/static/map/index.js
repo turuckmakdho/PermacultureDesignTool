@@ -2,9 +2,9 @@ let border;
 let lastShapePath;
 let autocomplete;
 let map;
+let margin = .25;
 
-
-// Initialize and add the map
+// Initialize and add the map to the web page
 function initMap() {
   
   initAutocomplete();
@@ -20,8 +20,9 @@ function initMap() {
       streetViewControl: false,
     });
 
+  // the initial rectangle drawn on the map
   border = new google.maps.Polygon({
-    paths: newBorderPath(initialPosition, .25),
+    paths: newBorderPath(initialPosition),
     strokeColor: "#000000",
     strokeOpacity: 0.8,
     strokeWeight: 2,
@@ -31,13 +32,27 @@ function initMap() {
 
   border.setMap(map);
 
+  // forLater
   // Gets border coordinates each time it's updated
   border.addListener('mouseup', () => {
     lastShapePath = border.getPath().getArray()
     console.log(`Last shape coordinates: ${lastShapePath}`);
   });
+
+  /*
+  map.addListener('zoom_changed', () => {
+    //TODO adjust shape scale according to zoom level
+    margin = map.getZoom() /1000;
+    border.setPath(newBorderPath(map.getCenter()));
+  })
+  */
+
+  map.addListener('center_changed', () => {
+    border.setPath(newBorderPath(map.getCenter()));
+  })
 }
 
+// autocompletes place entered by the user (can be any location in the world) and saves name and geometry infos
 function initAutocomplete(){
   autocomplete = new google.maps.places.Autocomplete(
     document.getElementById('autocomplete'),
@@ -46,11 +61,13 @@ function initAutocomplete(){
       fields: ['geometry', 'name'],
     }
   );
-  autocomplete.addListener('place_changed', onPlaceChanged);
 
+  // callback when user enters location
+  autocomplete.addListener('place_changed', onPlaceChanged);
 }
 
-function newBorderPath(position, margin){
+// creates a rectangular border around given position, margin being the distance from center
+function newBorderPath(position){
   const borderPath = [
     // lat: N-S [-90°;90°]
     // lng: W-E [-180°;180°]
@@ -60,9 +77,11 @@ function newBorderPath(position, margin){
     {lat: position.lat() - margin/2, lng: position.lng() + margin}  
   ];
 
+  //console.log(borderPath);
   return borderPath;
 }
 
+// when the user enters a location, verify it exists, and if it does, center the map on it, zoom, and move the border shape
 function onPlaceChanged(){
   var place = autocomplete.getPlace();
 
@@ -70,6 +89,7 @@ function onPlaceChanged(){
     document.getElementById('autocomplete').placeholder = 'Enter a place';
   } else {
     document.getElementById('autocomplete').placeholder = place.name;
+
     const newPosition = place.geometry.location;
 
     map.setCenter(newPosition);
