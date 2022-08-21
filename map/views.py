@@ -15,3 +15,13 @@ class indexView(TemplateView):
 
         return context
     
+class baseMapView(TemplateView):
+    template_name = 'map/baseMap.html'
+    
+    load_dotenv()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['API_Key'] = os.getenv("MAPS_API_KEY")
+        
+        return context

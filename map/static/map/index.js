@@ -81,6 +81,7 @@ function newBorderPath(position){
   return borderPath;
 }
 
+
 // when the user enters a location, verify it exists, and if it does, center the map on it, zoom, and move the border shape
 function onPlaceChanged(){
   var place = autocomplete.getPlace();
@@ -100,3 +101,4 @@ function onPlaceChanged(){
 }
 
 window.initMap = initMap;
+
