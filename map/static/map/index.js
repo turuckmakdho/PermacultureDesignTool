@@ -48,7 +48,11 @@ function initMap() {
   */
 
   map.addListener('center_changed', () => {
-    border.setPath(newBorderPath(map.getCenter()));
+    let mapCenter = map.getCenter();
+    border.setPath(newBorderPath(mapCenter));
+
+    let argsString = "center=" + mapCenter.toString().slice(1, mapCenter.toString().length-1) + "&zoom=" + map.getZoom();
+    document.getElementById('saveMap').setAttribute("href", argsString);
   })
 }
 
