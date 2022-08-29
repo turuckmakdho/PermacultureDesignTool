@@ -4,6 +4,8 @@ let autocomplete;
 let map;
 let margin = .25;
 
+let firstPoint = "null";
+
 // Initialize and add the map to the web page
 function initMap() {
   
@@ -22,7 +24,7 @@ function initMap() {
 
   // the initial rectangle drawn on the map
   border = new google.maps.Polygon({
-    paths: newBorderPath(initialPosition),
+    paths: newRectanglePath(initialPosition),
     strokeColor: "#000000",
     strokeOpacity: 0.8,
     strokeWeight: 2,
@@ -43,16 +45,38 @@ function initMap() {
   map.addListener('zoom_changed', () => {
     //TODO adjust shape scale according to zoom level
     margin = map.getZoom() /1000;
-    border.setPath(newBorderPath(map.getCenter()));
+    border.setPath(newRectanglePath(map.getCenter()));
   })
   */
 
   map.addListener('center_changed', () => {
-    let mapCenter = map.getCenter();
-    border.setPath(newBorderPath(mapCenter));
+    // TODO move whole shape with map
+    //border.setPath(newRectanglePath(mapCenter));
+    
+  }) 
 
-    let argsString = "center=" + mapCenter.toString().slice(1, mapCenter.toString().length-1) + "&zoom=" + map.getZoom();
-    document.getElementById('saveMap').setAttribute("href", argsString);
+  // saves map infos (shape, center, zoom) to show on next page
+  let saveButton = document.getElementById('saveMap');
+  saveButton.addEventListener('click', () => {
+    let mapCenter = map.getCenter();
+    let path = "color:0x000000|weight:2";
+
+    // formats the path to fit the url for the static map api
+    border.getPath().forEach(point => {
+      if (firstPoint == "null"){
+        firstPoint = "|" + point.lat() + "," + point.lng();
+      }
+      path += "|" + point.lat() + "," + point.lng();       
+    });
+    path += firstPoint;
+    
+    // complete arguments for the map parameters
+    let argsString =  "center=" + mapCenter.toString().slice(1, mapCenter.toString().length-1) + 
+                      "&zoom=" + map.getZoom() + 
+                      "&path=" + path;
+
+    // redirects to static map page                  
+    window.location.href = argsString;
   })
 }
 
@@ -71,7 +95,7 @@ function initAutocomplete(){
 }
 
 // creates a rectangular border around given position, margin being the distance from center
-function newBorderPath(position){
+function newRectanglePath(position){
   const borderPath = [
     // lat: N-S [-90°;90°]
     // lng: W-E [-180°;180°]
@@ -100,7 +124,7 @@ function onPlaceChanged(){
     map.setCenter(newPosition);
     map.setZoom(15);
 
-    border.setPath(newBorderPath(newPosition, .008));
+    border.setPath(newRectanglePath(newPosition, .008));
   }
 }
 
