@@ -1,8 +1,8 @@
 /* Set the size of the div element that contains the map */
 #map 
 {
-  height: 400px;
-  width: 500px;
+  height: 600px;
+  width: 800px;
   margin: auto;
   padding: 10px;
 }

@@ -20,6 +20,7 @@ function initMap() {
       zoom: 10, 
       center: initialPosition, 
       streetViewControl: false,
+      scaleControl: true
     });
 
   // the initial rectangle drawn on the map
@@ -29,7 +30,8 @@ function initMap() {
     strokeOpacity: 0.8,
     strokeWeight: 2,
     fillOpacity: 0,
-    editable: true
+    editable: true,
+    draggable: true
   });
 
   border.setMap(map);
@@ -56,9 +58,9 @@ function initMap() {
   }) 
 
   // saves map infos (shape, center, zoom) to show on next page
-  let saveButton = document.getElementById('saveMap');
+  const saveButton = document.getElementById('saveMap');
   saveButton.addEventListener('click', () => {
-    let mapCenter = map.getCenter();
+    const mapCenter = map.getCenter();
     let path = "color:0x000000|weight:2";
 
     // formats the path to fit the url for the static map api
@@ -69,11 +71,11 @@ function initMap() {
       path += "|" + point.lat() + "," + point.lng();       
     });
     path += firstPoint;
-    
+
     // complete arguments for the map parameters
-    let argsString =  "center=" + mapCenter.toString().slice(1, mapCenter.toString().length-1) + 
-                      "&zoom=" + map.getZoom() + 
-                      "&path=" + path;
+    const argsString =  "center=" + mapCenter.toString().slice(1, mapCenter.toString().length-1) + 
+                        "&zoom=" + map.getZoom() + 
+                        "&path=" + path;
 
     // redirects to static map page                  
     window.location.href = argsString;

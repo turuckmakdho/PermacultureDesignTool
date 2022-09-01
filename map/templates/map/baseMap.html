@@ -12,8 +12,35 @@
     <h2>Welcome to the Permaculture design helper!</h2>
 
     <!-- TODO Use key signature for more security -->
-    <img src="https://maps.googleapis.com/maps/api/staticmap?{{mapArgs}}&size=500x400&key={{API_Key}}">
+    <div id="map">
+      <img src="https://maps.googleapis.com/maps/api/staticmap?{{mapArgs}}&size=800x600&key={{API_Key}}">
+    </div>
 
+    <h3>Weather data</h3>
+    <h4>Dates</h4>
+    <p id="dates">Here are the dates</p>
+    
+    <h4>Max temperatures in °C</h4>
+    <p id="temperaturesMax">Here are the max daily temperatures</p>
+    <h4>Min temperatures in °C</h4>
+    <p id="temperaturesMin">Here are the min daily temperatures</p>
+    
+    <h4>Sunrise</h4>
+    <p id="sunrise">Here are the sunrise times</p>
+    <h4>Sunset</h4>
+    <p id="sunset">Here are the sunset times</p>
+    
+    <h4>Precipitation sum in mm</h4>
+    <p id="precipitation_sum">Here are the precipitation sum in mm</p>
+    <h4>Rain sum in mm</h4>
+    <p id="rain_sum">Here are the rain sum in mm</p>
+    <h4>Snowfall sum in cm</h4>
+    <p id="snowfall_sum">Here are the snowfall sum in cm</p>
+
+
+    <form action="/map">
+      <input type="submit" value="Back" />
+    </form>
 
   </body>
 </html>
