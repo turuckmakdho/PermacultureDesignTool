@@ -75,7 +75,6 @@ function getOpenMeteoData() {
         document.getElementById('precipitation_sum').innerHTML = reqResults.precipitation_sum;
         document.getElementById('rain_sum').innerHTML = reqResults.rain_sum;
         document.getElementById('snowfall_sum').innerHTML = reqResults.snowfall_sum;
-
     }
     
     request.send();
