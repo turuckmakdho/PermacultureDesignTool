@@ -11,6 +11,7 @@
   <body>
     <h2>Welcome to the Permaculture design helper!</h2>
 
+
     <!-- TODO Use key signature for more security -->
     <div id="map">
       <img src="https://maps.googleapis.com/maps/api/staticmap?{{mapArgs}}&size=800x600&key={{API_Key}}">
@@ -37,7 +38,9 @@
     <h4>Snowfall sum [cm]</h4>
     <p id="snowfall_sum">Here are the snowfall sum in cm</p>
 
-
+    <h3>Suggested crops</h4>
+    <ul id="cropsSuggestion">    </ul>
+    
     <form action="/map">
       <input type="submit" value="Back" />
     </form>

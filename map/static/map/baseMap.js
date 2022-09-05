@@ -1,15 +1,11 @@
-var request = new XMLHttpRequest()
-
-
 window.onload = () =>{
 
     getOpenMeteoData();
     
-    //console.log(window.location);
-    
 };
 
 function getOpenMeteoData() {
+    var request = new XMLHttpRequest()
 
     const APICall = new URL("https://archive-api.open-meteo.com/v1/era5");
 
@@ -44,27 +40,21 @@ function getOpenMeteoData() {
     APICall.searchParams.append('daily', 'snowfall_sum');    
     APICall.searchParams.append('timezone', 'auto')
 
-    
+    // request the info to the API
     request.open('GET', APICall, true);
-    
+
+    // parse request answers 
     request.onload = function () {
         
         const reqResults = JSON.parse(this.response).daily;
         
-        console.log(JSON.parse(this.response));
-
-        // cleanup sunrise and sunset outputs
+        // cleanup sunrise outputs
         const sunriseTimes = new Array();
-        reqResults.sunrise.forEach(element => {
-            const time = element.slice(element.search('T') + 1);
-            sunriseTimes.push(time);
-        });
+        cleanUpDateArray(reqResults.sunrise, sunriseTimes);
 
+        // cleanup sunset outputs
         const sunsetTimes = new Array();
-        reqResults.sunset.forEach(element => {
-            const time = element.slice(element.search('T') + 1);
-            sunsetTimes.push(time);
-        });
+        cleanUpDateArray(reqResults.sunset, sunsetTimes);
 
         // write data on webpage
         document.getElementById('dates').innerHTML = reqResults.time;
@@ -75,7 +65,87 @@ function getOpenMeteoData() {
         document.getElementById('precipitation_sum').innerHTML = reqResults.precipitation_sum;
         document.getElementById('rain_sum').innerHTML = reqResults.rain_sum;
         document.getElementById('snowfall_sum').innerHTML = reqResults.snowfall_sum;
+
+        getPlantsData(reqResults, sunriseTimes, sunsetTimes);
+    }
+
+    request.send();
+}
+
+function cleanUpDateArray(arrayToClean, outputArray) {
+    arrayToClean.forEach(element => {
+        const time = element.slice(element.search('T') + 1);
+        outputArray.push(time);
+    });
+}
+
+function getPlantsData(requestInfo, sunriseTimes, sunsetTimes) {
+
+    var request = new XMLHttpRequest()
+    const APICall = new URL("https://www.openfarm.cc/api/v1/crops/");
+    
+    // build request's parameters according to location 
+    setPlantFilters(APICall, requestInfo, sunriseTimes, sunsetTimes);
+
+    //console.log(APICall.href);
+
+    request.open('GET', APICall, true);
+    
+    request.onload = function () {
+
+        //console.log(typeof(JSON.parse(this.response)));
+
+        // parse request answers and show them on the page
+        JSON.parse(this.response).data.forEach(elem => {
+            //console.log(elem);
+            let cropsList = document.getElementById("cropsSuggestion");
+            let crop = document.createElement('li');
+            let text = document.createTextNode(elem.attributes.name);
+
+            crop.appendChild(text);
+            cropsList.appendChild(crop);
+        } )
     }
     
     request.send();
+}
+
+function setPlantFilters(Url, requestInfo, sunriseTimes, sunsetTimes) {
+
+    // console.log(requestInfo);
+
+    const daylight = getDaylightHours(requestInfo.sunrise, requestInfo.sunset);
+    const daylightAverage = daylight.reduce((a, b) => a + b, 0) / daylight.length;
+
+    console.log(daylightAverage);
+
+    const upperBound = 12;
+    const lowerBound = 11;
+
+    if (daylightAverage > upperBound)
+        Url.searchParams.append('filter', 'full sun')
+    else if (daylightAverage < lowerBound)
+        Url.searchParams.append('filter', 'full shade')
+    else 
+        Url.searchParams.append('filter', 'partial sun')
+
+
+    
+    console.log(Url.href);
+}
+
+function getDaylightHours(sunriseTimes, sunsetTimes) {
+    const daylightHours = new Array();
+    sunriseTimes.forEach((elem, index) => {
+
+        const sunset = new Date(sunsetTimes[index]);
+        const sunrise = new Date(elem);
+
+        if (isNaN(sunset.getTime()) || isNaN(sunrise.getTime()))
+            daylightHours.push(12);
+        else
+            daylightHours.push((sunset.getTime() - sunrise.getTime()) / (3600*1000));
+    })
+
+    return daylightHours;
 }
