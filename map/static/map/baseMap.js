@@ -66,7 +66,7 @@ function getOpenMeteoData() {
         document.getElementById('rain_sum').innerHTML = reqResults.rain_sum;
         document.getElementById('snowfall_sum').innerHTML = reqResults.snowfall_sum;
 
-        getPlantsData(reqResults, sunriseTimes, sunsetTimes);
+        getPlantsData(reqResults);
     }
 
     request.send();
@@ -79,13 +79,13 @@ function cleanUpDateArray(arrayToClean, outputArray) {
     });
 }
 
-function getPlantsData(requestInfo, sunriseTimes, sunsetTimes) {
+function getPlantsData(requestInfo) {
 
     var request = new XMLHttpRequest()
     const APICall = new URL("https://www.openfarm.cc/api/v1/crops/");
     
     // build request's parameters according to location 
-    setPlantFilters(APICall, requestInfo, sunriseTimes, sunsetTimes);
+    setPlantFilters(APICall, requestInfo);
 
     //console.log(APICall.href);
 
@@ -110,28 +110,33 @@ function getPlantsData(requestInfo, sunriseTimes, sunsetTimes) {
     request.send();
 }
 
-function setPlantFilters(Url, requestInfo, sunriseTimes, sunsetTimes) {
+function setPlantFilters(Url, requestInfo) {
 
     // console.log(requestInfo);
 
-    const daylight = getDaylightHours(requestInfo.sunrise, requestInfo.sunset);
-    const daylightAverage = daylight.reduce((a, b) => a + b, 0) / daylight.length;
-
-    console.log(daylightAverage);
-
+    // get average daylight hours in the last year and show it on the page
+    const daylightAverage = getDaylightHours(requestInfo.sunrise, requestInfo.sunset); 
+    const daylightString = Math.floor(daylightAverage) + " H " + Math.floor((daylightAverage - Math.floor(daylightAverage)) * 60) + " min";
+    document.getElementById("sunlightHours").innerHTML = daylightString;
+    
+    // change filter accroding to daylight hours
     const upperBound = 12;
     const lowerBound = 11;
 
     if (daylightAverage > upperBound)
-        Url.searchParams.append('filter', 'full sun')
+        Url.searchParams.append('filter', 'full sun');
     else if (daylightAverage < lowerBound)
-        Url.searchParams.append('filter', 'full shade')
+        Url.searchParams.append('filter', 'full shade');
     else 
-        Url.searchParams.append('filter', 'partial sun')
+        Url.searchParams.append('filter', 'partial sun');
 
-
+    // get all other averages and shows them
+    document.getElementById("maxTempAvg").innerHTML = (requestInfo.temperature_2m_max.reduce((a, b) => a + b, 0) / requestInfo.temperature_2m_max.length).toFixed(2) + "°C";
+    document.getElementById("minTempAvg").innerHTML = (requestInfo.temperature_2m_min.reduce((a, b) => a + b, 0) / requestInfo.temperature_2m_min.length).toFixed(2) + "°C";
+    document.getElementById("precipitationAvg").innerHTML = (requestInfo.precipitation_sum.reduce((a, b) => a + b, 0) / requestInfo.precipitation_sum.length).toFixed(2) + "mm";
+    document.getElementById("rainAvg").innerHTML = (requestInfo.rain_sum.reduce((a, b) => a + b, 0) / requestInfo.rain_sum.length).toFixed(2) + "mm";
+    document.getElementById("snowAvg").innerHTML = (requestInfo.snowfall_sum.reduce((a, b) => a + b, 0) / requestInfo.snowfall_sum.length).toFixed(2) + "cm";
     
-    console.log(Url.href);
 }
 
 function getDaylightHours(sunriseTimes, sunsetTimes) {
@@ -141,11 +146,12 @@ function getDaylightHours(sunriseTimes, sunsetTimes) {
         const sunset = new Date(sunsetTimes[index]);
         const sunrise = new Date(elem);
 
+        // gives sunlight hours and accounts for days when the sun doesn't set or doesn't rise
         if (isNaN(sunset.getTime()) || isNaN(sunrise.getTime()))
-            daylightHours.push(12);
+            daylightHours.push(12); // 12 is the average of days when there's 24h of sun vs 0h of sun
         else
             daylightHours.push((sunset.getTime() - sunrise.getTime()) / (3600*1000));
     })
 
-    return daylightHours;
+    return daylightHours.reduce((a, b) => a + b, 0) / daylightHours.length;;
 }
